@@ -68,10 +68,12 @@ public class ImageSelect extends Application {
     private ScrollPane scrollPane2;
     int chunkWidth; // determines the chunk width and height
     int chunkHeight;
-    private Imagen matriz[][];
+    private Imagen matrizI[][];
+    private Celda matr
     int corte;
     int R;
     int C;
+    private Imagen imageSelect;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -120,7 +122,8 @@ public class ImageSelect extends Application {
         this.scene = new Scene(this.pane, WIDTH, HEIGHT);
         scrollPane = new ScrollPane();
         scrollPane.setPrefSize(600, 600);
-
+        canvas.setOnMouseClicked(eventSelectImage);
+        canvas2.setOnMouseClicked(eventMosaic);
         scrollPane.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
         scrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
         scrollPane2 = new ScrollPane();
@@ -150,7 +153,6 @@ public class ImageSelect extends Application {
                 pane.getChildren().add(scrollPane2);
                 loadImage(gc);
                 draw(gc);
-
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(ImageSelect.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
@@ -159,24 +161,51 @@ public class ImageSelect extends Application {
         }
     };
 
-    EventHandler<javafx.scene.input.MouseEvent> eventHandler = new EventHandler<javafx.scene.input.MouseEvent>() {
+    EventHandler<javafx.scene.input.MouseEvent> eventSelectImage = new EventHandler<javafx.scene.input.MouseEvent>() {
         @Override
         public void handle(javafx.scene.input.MouseEvent e) {
-            System.out.println("Hello World");
+            int x = (int) e.getX();
+            int y = (int) e.getY();
+            selectImage(x, y);
         }
     };
+
+    EventHandler<javafx.scene.input.MouseEvent> eventMosaic = new EventHandler<javafx.scene.input.MouseEvent>() {
+        @Override
+        public void handle(javafx.scene.input.MouseEvent e) {
+            int x = (int) e.getX();
+            int y = (int) e.getY();
+            System.out.println("Mosaic " + x + "," + y);//these co-ords are relative to the component
+            dibujarI(x, y);
+        }
+    };
+
+    public void selectImage(int x, int y) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if ((x >= matrizI[i][j].getX() && x <= matrizI[i][j].getX() + matrizI[i][j].getWidth())
+                 && (y >= matrizI[i][j].getY() && y <= matrizI[i][j].getY() + matrizI[i][j].getHeigth())) {
+                    imageSelect = new Imagen(matrizI[i][j].getX(), matrizI[i][j].getY(), chunkWidth, chunkWidth, matrizI[i][j].getImage());
+                    System.out.println(imageSelect.toString());
+                }
+            }
+        }
+    }
+
+    public void dibujarI(int x, int y) {
+        System.out.println(imageSelect.getImage().toString());
+        gc2.drawImage(imageSelect.getImage(), x, y, imageSelect.getWidth(), imageSelect.getWidth());
+    }
 
     private void loadImage(GraphicsContext gc) throws IOException {
         rows = (int) image.getWidth() / Integer.parseInt(field.getText());
         cols = (int) image.getHeight() / Integer.parseInt(field.getText());
-        R = Integer.parseInt(field.getText()) / rows;
-        C = Integer.parseInt(field.getText()) / cols;
+        R = rows*cols;
         chunkWidth = Integer.parseInt(field.getText());
         chunkHeight = Integer.parseInt(field.getText());
         canvas.setWidth(chunkWidth * rows);
         canvas.setHeight(chunkHeight * cols);
-        matriz = new Imagen[R][C];
-        System.out.println(matriz.length);
+        matrizI = new Imagen[R][R];
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 this.pixel = image.getPixelReader();//recibe los pixeles de la imagen
@@ -184,12 +213,9 @@ public class ImageSelect extends Application {
                 imagenPartes.add(writable);
             }
         }
-        System.out.println("width" + chunkWidth);
-        System.out.println("height" + chunkHeight);
         rowsM = (int) (Integer.parseInt(field3.getText()) / chunkWidth);
         colsM = (int) (Integer.parseInt(field4.getText()) / chunkWidth);
-        System.out.println("row " + rowsM);
-        System.out.println("cols " + colsM);
+
         for (int i = 0; i <= rowsM; i++) {
             gc2.strokeLine(0, i * chunkWidth, Integer.parseInt(field3.getText()), i * chunkWidth);
 
@@ -204,7 +230,8 @@ public class ImageSelect extends Application {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 gc.drawImage(imagenPartes.get(iter), i * (chunkWidth + 2), j * (chunkHeight + 2));
-                matriz[i][j] = new Imagen(i * (chunkWidth), j * (chunkHeight), chunkWidth, chunkHeight, imagenPartes.get(iter));
+                matrizI[i][j] = new Imagen(i * (chunkWidth), j * (chunkHeight), chunkWidth, chunkHeight, imagenPartes.get(iter));
+                System.out.println(matrizI.length);
                 iter++;
             }
         }

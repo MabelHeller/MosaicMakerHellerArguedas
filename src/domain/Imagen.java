@@ -78,8 +78,6 @@ public class Imagen {
         this.image = image;
     }
 
-  
-
     @Override
     public String toString() {
         return "Imagen{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + image + '}';

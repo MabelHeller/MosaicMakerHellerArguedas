@@ -10,48 +10,74 @@ package domain;
  * @author Heller
  */
 public class Celda {
-    private int x;
-    private int y;
-    private Imagen imagen;
+   
+    //atributos
+    private double x;
+    private double y;
+    private int width;
+    private int heigth;
+    private Imagen image;
 
-    public Celda(int x, int y, Imagen imagen) {
+    //constructores
+
+    public Celda(double x, double y, int width, int heigth, Imagen image) {
         this.x = x;
         this.y = y;
-        this.imagen = imagen;
+        this.width = width;
+        this.heigth = heigth;
+        this.image = image;
     }
     
-    public Celda() {
+     public Celda() {
         this.x = x;
         this.y = y;
-        this.imagen = imagen;
+        this.width = width;
+        this.heigth = heigth;
+        this.image = image;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(double y) {
         this.y = y;
     }
 
-    public Imagen getImagen() {
-        return imagen;
+    public int getWidth() {
+        return width;
     }
 
-    public void setImagen(Imagen imagen) {
-        this.imagen = imagen;
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeigth() {
+        return heigth;
+    }
+
+    public void setHeigth(int heigth) {
+        this.heigth = heigth;
+    }
+
+    public Imagen getImage() {
+        return image;
+    }
+
+    public void setImage(Imagen image) {
+        this.image = image;
     }
 
     @Override
     public String toString() {
-        return "Celda{" + "x=" + x + ", y=" + y + ", imagen=" + imagen + '}';
-    }    
+        return "Imagen{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + image + '}';
+    }     
 }
