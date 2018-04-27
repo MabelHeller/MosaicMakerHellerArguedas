@@ -5,6 +5,7 @@
  */
 package gui;
 
+import domain.Celda;
 import domain.Imagen;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -69,7 +70,7 @@ public class ImageSelect extends Application {
     int chunkWidth; // determines the chunk width and height
     int chunkHeight;
     private Imagen matrizI[][];
-    private Celda matr
+    private Celda matrizC[][];
     int corte;
     int R;
     int C;
@@ -184,7 +185,7 @@ public class ImageSelect extends Application {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if ((x >= matrizI[i][j].getX() && x <= matrizI[i][j].getX() + matrizI[i][j].getWidth())
-                 && (y >= matrizI[i][j].getY() && y <= matrizI[i][j].getY() + matrizI[i][j].getHeigth())) {
+                        && (y >= matrizI[i][j].getY() && y <= matrizI[i][j].getY() + matrizI[i][j].getHeigth())) {
                     imageSelect = new Imagen(matrizI[i][j].getX(), matrizI[i][j].getY(), chunkWidth, chunkWidth, matrizI[i][j].getImage());
                     System.out.println(imageSelect.toString());
                 }
@@ -193,14 +194,21 @@ public class ImageSelect extends Application {
     }
 
     public void dibujarI(int x, int y) {
-        System.out.println(imageSelect.getImage().toString());
-        gc2.drawImage(imageSelect.getImage(), x, y, imageSelect.getWidth(), imageSelect.getWidth());
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if ((x >= matrizC[i][j].getX() && x <= matrizC[i][j].getX() + matrizC[i][j].getWidth())
+                        && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
+                    gc2.drawImage(imageSelect.getImage(), matrizC[i][j].getX(), matrizC[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
+
+                }
+            }
+        }
     }
 
     private void loadImage(GraphicsContext gc) throws IOException {
         rows = (int) image.getWidth() / Integer.parseInt(field.getText());
         cols = (int) image.getHeight() / Integer.parseInt(field.getText());
-        R = rows*cols;
+        R = rows * cols;
         chunkWidth = Integer.parseInt(field.getText());
         chunkHeight = Integer.parseInt(field.getText());
         canvas.setWidth(chunkWidth * rows);
@@ -215,13 +223,15 @@ public class ImageSelect extends Application {
         }
         rowsM = (int) (Integer.parseInt(field3.getText()) / chunkWidth);
         colsM = (int) (Integer.parseInt(field4.getText()) / chunkWidth);
-
+        int tamañoMatrizC = rowsM * colsM;
+        matrizC = new Celda[tamañoMatrizC][tamañoMatrizC];
         for (int i = 0; i <= rowsM; i++) {
-            gc2.strokeLine(0, i * chunkWidth, Integer.parseInt(field3.getText()), i * chunkWidth);
 
-        }
-        for (int j = 0; j <= colsM; j++) {
-            gc2.strokeLine(j * chunkWidth, 0, j * chunkWidth, Integer.parseInt(field4.getText()));
+            for (int j = 0; j <= colsM; j++) {
+                gc2.strokeLine(0, i * chunkWidth, Integer.parseInt(field3.getText()), i * chunkWidth);
+                gc2.strokeLine(j * chunkWidth, 0, j * chunkWidth, Integer.parseInt(field4.getText()));
+                matrizC[i][j] = new Celda(i * chunkWidth, j * chunkHeight, chunkWidth, chunkWidth);
+            }
         }
     }
 
@@ -231,7 +241,6 @@ public class ImageSelect extends Application {
             for (int j = 0; j < cols; j++) {
                 gc.drawImage(imagenPartes.get(iter), i * (chunkWidth + 2), j * (chunkHeight + 2));
                 matrizI[i][j] = new Imagen(i * (chunkWidth), j * (chunkHeight), chunkWidth, chunkHeight, imagenPartes.get(iter));
-                System.out.println(matrizI.length);
                 iter++;
             }
         }

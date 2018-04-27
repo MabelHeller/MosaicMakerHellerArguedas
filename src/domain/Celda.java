@@ -20,12 +20,11 @@ public class Celda {
 
     //constructores
 
-    public Celda(double x, double y, int width, int heigth, Imagen image) {
+    public Celda(double x, double y, int width, int heigth) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.heigth = heigth;
-        this.image = image;
     }
     
      public Celda() {
@@ -33,7 +32,6 @@ public class Celda {
         this.y = y;
         this.width = width;
         this.heigth = heigth;
-        this.image = image;
     }
 
     public double getX() {
@@ -78,6 +76,6 @@ public class Celda {
 
     @Override
     public String toString() {
-        return "Imagen{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + image + '}';
+        return "Celda{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + image + '}';
     }     
 }
