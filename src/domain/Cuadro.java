@@ -9,25 +9,26 @@ package domain;
  *
  * @author Heller
  */
-public class Celda {
+public class Cuadro {
    
     //atributos
     private double x;
     private double y;
     private int width;
     private int heigth;
-    private Imagen image;
+    private Imagen imagen;
 
     //constructores
 
-    public Celda(double x, double y, int width, int heigth) {
+     public Cuadro(double x, double y, int width, int heigth, Imagen imagen) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.heigth = heigth;
-    }
+        this.imagen=imagen;
+    }    
     
-     public Celda() {
+     public Cuadro() {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -67,15 +68,15 @@ public class Celda {
     }
 
     public Imagen getImage() {
-        return image;
+        return imagen;
     }
 
     public void setImage(Imagen image) {
-        this.image = image;
+        this.imagen = image;
     }
 
     @Override
     public String toString() {
-        return "Celda{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + image + '}';
+        return "Celda{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + imagen + '}';
     }     
 }

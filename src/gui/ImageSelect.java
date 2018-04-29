@@ -5,9 +5,9 @@
  */
 package gui;
 
-import domain.Celda;
+import data.CeldaData;
+import domain.Cuadro;
 import domain.Imagen;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,6 +19,7 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -27,8 +28,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -48,6 +51,9 @@ public class ImageSelect extends Application {
     private Canvas canvas2;
     private TextField field;
     private Button button;
+    private Button buttonRotateL;
+    private Button buttonRotateR;
+    private Button buttonDeleted;
     private Label label;
     private TextField field3;
     private Label label3;
@@ -61,7 +67,6 @@ public class ImageSelect extends Application {
     int rowsM;
     int colsM;
     private String ruta;
-    private Imagen imagen;
     private Image image;
     private GraphicsContext gc;
     private GraphicsContext gc2;
@@ -69,12 +74,20 @@ public class ImageSelect extends Application {
     private ScrollPane scrollPane2;
     int chunkWidth; // determines the chunk width and height
     int chunkHeight;
+    private SnapshotParameters snapshot;
     private Imagen matrizI[][];
-    private Celda matrizC[][];
+    private Cuadro matrizC[][];
     int corte;
     int R;
     int C;
     private Imagen imageSelect;
+    private Imagen imagenCambiada;
+    ImageView imageS;
+    Image imagenRotate;
+    int x;
+    int y;
+    Imagen Rotate;
+    int tamañoMatrizC;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -112,6 +125,19 @@ public class ImageSelect extends Application {
         this.field4 = new TextField();
         this.field4.relocate(865, 610);
         this.field4.setPrefSize(70, 20);
+
+        this.buttonRotateL = new Button("Rotate left");
+        this.buttonRotateL.relocate(945, 605);
+        this.buttonRotateL.setPrefSize(90, 30);
+        this.buttonRotateL.setOnAction(buttonRotateLAction);
+        this.buttonRotateR = new Button("Rotate Right");
+        this.buttonRotateR.relocate(1040, 605);
+        this.buttonRotateR.setPrefSize(90, 30);
+        this.buttonRotateR.setOnAction(buttonRotateRAction);
+        this.buttonDeleted = new Button("Deleted");
+        this.buttonDeleted.relocate(1135, 605);
+        this.buttonDeleted.setPrefSize(90, 30);
+        this.buttonDeleted.setOnAction(buttonDeleteAction);
         this.pane = new Pane();
         this.pane.getChildren().add(this.button);
         this.pane.getChildren().add(this.label);
@@ -120,6 +146,9 @@ public class ImageSelect extends Application {
         this.pane.getChildren().add(this.field3);
         this.pane.getChildren().add(this.label4);
         this.pane.getChildren().add(this.field4);
+        this.pane.getChildren().add(this.buttonRotateL);
+        this.pane.getChildren().add(this.buttonRotateR);
+        this.pane.getChildren().add(this.buttonDeleted);
         this.scene = new Scene(this.pane, WIDTH, HEIGHT);
         scrollPane = new ScrollPane();
         scrollPane.setPrefSize(600, 600);
@@ -171,35 +200,12 @@ public class ImageSelect extends Application {
         }
     };
 
-    EventHandler<javafx.scene.input.MouseEvent> eventMosaic = new EventHandler<javafx.scene.input.MouseEvent>() {
-        @Override
-        public void handle(javafx.scene.input.MouseEvent e) {
-            int x = (int) e.getX();
-            int y = (int) e.getY();
-            System.out.println("Mosaic " + x + "," + y);//these co-ords are relative to the component
-            dibujarI(x, y);
-        }
-    };
-
     public void selectImage(int x, int y) {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if ((x >= matrizI[i][j].getX() && x <= matrizI[i][j].getX() + matrizI[i][j].getWidth())
                         && (y >= matrizI[i][j].getY() && y <= matrizI[i][j].getY() + matrizI[i][j].getHeigth())) {
                     imageSelect = new Imagen(matrizI[i][j].getX(), matrizI[i][j].getY(), chunkWidth, chunkWidth, matrizI[i][j].getImage());
-                    System.out.println(imageSelect.toString());
-                }
-            }
-        }
-    }
-
-    public void dibujarI(int x, int y) {
-        for (int i = 0; i < rowsM; i++) {
-            for (int j = 0; j < colsM; j++) {
-                if ((x >= matrizC[i][j].getX() && x <= matrizC[i][j].getX() + matrizC[i][j].getWidth())
-                        && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
-                    gc2.drawImage(imageSelect.getImage(), matrizC[i][j].getX(), matrizC[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
-
                 }
             }
         }
@@ -223,18 +229,22 @@ public class ImageSelect extends Application {
         }
         rowsM = (int) (Integer.parseInt(field3.getText()) / chunkWidth);
         colsM = (int) (Integer.parseInt(field4.getText()) / chunkWidth);
-        int tamañoMatrizC = rowsM * colsM;
-        matrizC = new Celda[tamañoMatrizC][tamañoMatrizC];
+        tamañoMatrizC = rowsM * colsM;
+        System.out.println(tamañoMatrizC + "tamaño");
+        matrizC = new Cuadro[tamañoMatrizC][tamañoMatrizC];
         for (int i = 0; i <= rowsM; i++) {
-
             for (int j = 0; j <= colsM; j++) {
                 gc2.strokeLine(0, i * chunkWidth, Integer.parseInt(field3.getText()), i * chunkWidth);
                 gc2.strokeLine(j * chunkWidth, 0, j * chunkWidth, Integer.parseInt(field4.getText()));
-                matrizC[i][j] = new Celda(i * chunkWidth, j * chunkHeight, chunkWidth, chunkWidth);
+                matrizC[i][j] = new Cuadro(i * chunkWidth, j * chunkHeight, chunkWidth, chunkWidth, null);
+
             }
         }
     }
 
+    /**
+     * ********************DIBUJA LA IMAGEN CORTADA*******************
+     */
     private void draw(GraphicsContext gc) {
         int iter = 0;
         for (int i = 0; i < rows; i++) {
@@ -245,4 +255,111 @@ public class ImageSelect extends Application {
             }
         }
     }
+
+    /**
+     * *****DIBUJA LA IMAGEN EN LA CUADRICULA**********
+     */
+    public void dibujarI(int x, int y) {
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if ((x >= matrizC[i][j].getX() && x <= matrizC[i][j].getX() + matrizC[i][j].getWidth())
+                        && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
+                    if (matrizC[i][j].getImage() == null) {
+                        gc2.drawImage(imageSelect.getImage(), matrizC[i][j].getX(), matrizC[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
+                        imageSelect = new Imagen(matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth(), imageSelect.getImage());
+                        matrizC[i][j] = new Cuadro(matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth(), imageSelect);
+                    }
+                }
+            }
+        }
+    }
+
+    EventHandler<MouseEvent> eventMosaic = new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+            x = (int) e.getX();
+            y = (int) e.getY();
+            dibujarI(x, y);
+        }
+    };
+
+    /**
+     * ************ROTAR A LA IZQUIERDA*************
+     */
+    public void RotateLeft(int x, int y) {
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if ((x >= matrizC[i][j].getX() && x <= matrizC[i][j].getX() + matrizC[i][j].getWidth())
+                        && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
+                    imagenRotate = matrizC[i][j].getImage().getImage();
+                    imageS = new ImageView(imagenRotate);
+                    imageS.setRotate(imageS.getRotate() + 90); //rota la imagen 90 gredos sentido del reloj
+                    imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
+                    gc2.drawImage(this.imagenRotate, matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth());
+                    imagenRotate = imageS.snapshot(this.snapshot, null);
+                    imagenCambiada = new Imagen(matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth(), imagenRotate);
+                    matrizC[i][j] = new Cuadro(matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth(), imagenCambiada);
+                }
+            }
+        }
+    }
+
+    EventHandler<ActionEvent> buttonRotateLAction = new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent event) {
+            RotateLeft(x, y);
+        }
+    };
+
+    /**
+     * ***************ROTAR A LA DERECHA********************
+     */
+    public void RotateRight(int x, int y) {
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if ((x >= matrizC[i][j].getX() && x <= matrizC[i][j].getX() + matrizC[i][j].getWidth())
+                        && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
+                    imagenRotate = matrizC[i][j].getImage().getImage();
+                    imageS = new ImageView(imagenRotate);
+                    imageS.setRotate(imageS.getRotate() - 90); //rota la imagen 90 gredos sentido del reloj
+                    imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
+                    gc2.drawImage(this.imagenRotate, matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth());
+                    imagenRotate = imageS.snapshot(this.snapshot, null);
+                    imagenCambiada = new Imagen(matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth(), imagenRotate);
+                    matrizC[i][j] = new Cuadro(matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth(), imagenCambiada);
+                }
+            }
+        }
+    }
+    EventHandler<ActionEvent> buttonRotateRAction = new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent event) {
+            RotateRight(x, y);
+        }
+    };
+
+    /**
+     * *****************ELIMINAR IMAGEN******************
+     */
+    public void RemoveImage(int x, int y) {
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if ((x >= matrizC[i][j].getX() && x <= matrizC[i][j].getX() + matrizC[i][j].getWidth())
+                        && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
+                    imagenRotate = null;
+                    imageS = new ImageView(imagenRotate);
+                    matrizC[i][j] = new Cuadro(matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth(), null);
+                    imageS.setImage(null); //rota la imagen 90 gredos sentido del reloj
+                    imagenRotate = imageS.snapshot(snapshot, null);
+                    imagenCambiada = new Imagen(matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth(), imagenRotate);
+                    gc2.drawImage(this.imagenRotate, matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth());
+                    System.out.println(matrizC[i][j].toString());
+                }
+            }
+        }
+    }
+    
+    EventHandler<ActionEvent> buttonDeleteAction = new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent event) {
+            RemoveImage(x, y);
+        }
+    };
 }
