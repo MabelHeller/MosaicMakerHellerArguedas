@@ -43,6 +43,7 @@ import javafx.stage.Stage;
  */
 public class ImageSelect extends Application {
 
+    //atributos
     private final int WIDTH = 1400;
     private final int HEIGHT = 700;
     private Scene scene;
@@ -62,32 +63,31 @@ public class ImageSelect extends Application {
     private PixelReader pixel; //se encarga de leer pixel por pixel
     private WritableImage writable; //convierte pixeles en una imagen
     private ArrayList<Image> imagenPartes = new ArrayList<>();
-    int rows;
-    int cols;
-    int rowsM;
-    int colsM;
+    private int rows;
+    private int cols;
+    private int rowsM;
+    private int colsM;
     private String ruta;
     private Image image;
     private GraphicsContext gc;
     private GraphicsContext gc2;
     private ScrollPane scrollPane;
     private ScrollPane scrollPane2;
-    int chunkWidth; // determines the chunk width and height
-    int chunkHeight;
+    private int chunkWidth; // determines the chunk width and height
+    private int chunkHeight;
     private SnapshotParameters snapshot;
     private Imagen matrizI[][];
     private Cuadro matrizC[][];
-    int corte;
-    int R;
-    int C;
+    private int corte;
+    private int R;
+    private int C;
     private Imagen imageSelect;
     private Imagen imagenCambiada;
-    ImageView imageS;
-    Image imagenRotate;
-    int x;
-    int y;
-    Imagen Rotate;
-    int tamañoMatrizC;
+    private ImageView imageS;
+    private Image imagenRotate;
+    private int x;
+    private int y;
+    private int tamañoMatrizC;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -218,7 +218,7 @@ public class ImageSelect extends Application {
         chunkWidth = Integer.parseInt(field.getText());
         chunkHeight = Integer.parseInt(field.getText());
         canvas.setWidth(chunkWidth * rows);
-        canvas.setHeight(chunkHeight * cols);
+        canvas.setHeight(chunkHeight * cols);            
         matrizI = new Imagen[R][R];
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
@@ -230,6 +230,8 @@ public class ImageSelect extends Application {
         rowsM = (int) (Integer.parseInt(field3.getText()) / chunkWidth);
         colsM = (int) (Integer.parseInt(field4.getText()) / chunkWidth);
         tamañoMatrizC = rowsM * colsM;
+        canvas2.setWidth(chunkWidth * rowsM);
+        canvas2.setHeight(chunkHeight * colsM);
         System.out.println(tamañoMatrizC + "tamaño");
         matrizC = new Cuadro[tamañoMatrizC][tamañoMatrizC];
         for (int i = 0; i <= rowsM; i++) {
@@ -356,10 +358,23 @@ public class ImageSelect extends Application {
             }
         }
     }
-    
+
     EventHandler<ActionEvent> buttonDeleteAction = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             RemoveImage(x, y);
         }
     };
+
+    /**
+     * ******************GUARDAR LA IIMAGEN****************************
+     */
+    public void saveImage() {
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if ((x >= matrizC[i][j].getX() && x <= matrizC[i][j].getX() + matrizC[i][j].getWidth())
+                        && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
+                }
+            }
+        }
+    }
 }
