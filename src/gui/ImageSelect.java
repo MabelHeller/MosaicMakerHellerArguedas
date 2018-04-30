@@ -5,9 +5,10 @@
  */
 package gui;
 
-import data.CeldaData;
 import domain.Cuadro;
 import domain.Imagen;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -36,6 +38,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javax.imageio.ImageIO;
 
 /**
  *
@@ -55,6 +58,8 @@ public class ImageSelect extends Application {
     private Button buttonRotateL;
     private Button buttonRotateR;
     private Button buttonDeleted;
+    private Button buttonSaveImage;
+    private Button buttonSave;
     private Label label;
     private TextField field3;
     private Label label3;
@@ -84,7 +89,9 @@ public class ImageSelect extends Application {
     private Imagen imageSelect;
     private Imagen imagenCambiada;
     private ImageView imageS;
+    private ImageView imageView;
     private Image imagenRotate;
+    private Image saveImage;
     private int x;
     private int y;
     private int tamañoMatrizC;
@@ -108,11 +115,17 @@ public class ImageSelect extends Application {
         this.field = new TextField();
         this.field.relocate(320, 610);
         this.field.setPrefSize(70, 20);
-
+        this.buttonSaveImage = new Button("Save image of mosaic");
+        this.buttonSaveImage.relocate(437, 605);
+        this.buttonSaveImage.setPrefSize(140, 30);
+        this.buttonSaveImage.setOnAction(buttonSavePng);
+        this.buttonSave = new Button("Save");
+        this.buttonSave.relocate(593, 605);
+        this.buttonSave.setPrefSize(70, 30);
+        this.buttonSave.setOnAction(buttonSavePng);
         this.canvas2 = new Canvas(1400, 1400);
         canvas = new Canvas(1400, 1400);
         gc2 = this.canvas2.getGraphicsContext2D();
-
         this.label3 = new Label("Width");
         this.label3.relocate(700, 610);
         this.label3.setMinSize(150, 20);
@@ -125,7 +138,6 @@ public class ImageSelect extends Application {
         this.field4 = new TextField();
         this.field4.relocate(865, 610);
         this.field4.setPrefSize(70, 20);
-
         this.buttonRotateL = new Button("Rotate left");
         this.buttonRotateL.relocate(945, 605);
         this.buttonRotateL.setPrefSize(90, 30);
@@ -149,6 +161,8 @@ public class ImageSelect extends Application {
         this.pane.getChildren().add(this.buttonRotateL);
         this.pane.getChildren().add(this.buttonRotateR);
         this.pane.getChildren().add(this.buttonDeleted);
+        this.pane.getChildren().add(this.buttonSaveImage);
+        this.pane.getChildren().add(this.buttonSave);
         this.scene = new Scene(this.pane, WIDTH, HEIGHT);
         scrollPane = new ScrollPane();
         scrollPane.setPrefSize(600, 600);
@@ -218,7 +232,7 @@ public class ImageSelect extends Application {
         chunkWidth = Integer.parseInt(field.getText());
         chunkHeight = Integer.parseInt(field.getText());
         canvas.setWidth(chunkWidth * rows);
-        canvas.setHeight(chunkHeight * cols);            
+        canvas.setHeight(chunkHeight * cols);
         matrizI = new Imagen[R][R];
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
@@ -239,7 +253,6 @@ public class ImageSelect extends Application {
                 gc2.strokeLine(0, i * chunkWidth, Integer.parseInt(field3.getText()), i * chunkWidth);
                 gc2.strokeLine(j * chunkWidth, 0, j * chunkWidth, Integer.parseInt(field4.getText()));
                 matrizC[i][j] = new Cuadro(i * chunkWidth, j * chunkHeight, chunkWidth, chunkWidth, null);
-
             }
         }
     }
@@ -295,7 +308,7 @@ public class ImageSelect extends Application {
                         && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
                     imagenRotate = matrizC[i][j].getImage().getImage();
                     imageS = new ImageView(imagenRotate);
-                    imageS.setRotate(imageS.getRotate() + 90); //rota la imagen 90 gredos sentido del reloj
+                    imageS.setRotate(imageS.getRotate() - 90); //rota la imagen 90 gredos sentido del reloj
                     imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
                     gc2.drawImage(this.imagenRotate, matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth());
                     imagenRotate = imageS.snapshot(this.snapshot, null);
@@ -322,7 +335,7 @@ public class ImageSelect extends Application {
                         && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
                     imagenRotate = matrizC[i][j].getImage().getImage();
                     imageS = new ImageView(imagenRotate);
-                    imageS.setRotate(imageS.getRotate() - 90); //rota la imagen 90 gredos sentido del reloj
+                    imageS.setRotate(imageS.getRotate() + 90); //rota la imagen 90 gredos sentido del reloj
                     imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
                     gc2.drawImage(this.imagenRotate, matrizC[i][j].getX(), matrizC[i][j].getY(), matrizC[i][j].getWidth(), matrizC[i][j].getHeigth());
                     imagenRotate = imageS.snapshot(this.snapshot, null);
@@ -368,13 +381,58 @@ public class ImageSelect extends Application {
     /**
      * ******************GUARDAR LA IIMAGEN****************************
      */
-    public void saveImage() {
+    public void saveImage() throws IOException {
+        FileChooser fileChooserS = new FileChooser();
+        //Show save file dialog        
+        File file = fileChooserS.showSaveDialog(null);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos PNG (*.png)", "*.PNG");
+        fileChooserS.setSelectedExtensionFilter(extFilter);
+        scene.setFill(Color.TRANSPARENT); //le da el atributo de transparencia
+        gc2.clearRect(0, 0, chunkWidth * rowsM, chunkHeight*colsM);
+        for (int i = 0; i <= rowsM; i++) {
+            for (int j = 0; j <= colsM; j++) {
+                gc2.setStroke(Color.TRANSPARENT);
+                gc2.strokeLine(0, i * chunkWidth, Integer.parseInt(field3.getText()), i * chunkWidth);
+                gc2.strokeLine(j * chunkWidth, 0, j * chunkWidth, Integer.parseInt(field4.getText()));                
+            }
+        }
         for (int i = 0; i < rowsM; i++) {
             for (int j = 0; j < colsM; j++) {
-                if ((x >= matrizC[i][j].getX() && x <= matrizC[i][j].getX() + matrizC[i][j].getWidth())
-                        && (y >= matrizC[i][j].getY() && y <= matrizC[i][j].getY() + matrizC[i][j].getHeigth())) {
+                if (matrizC[i][j].getImage() != null) {
+                    gc2.drawImage(matrizC[i][j].getImage().getImage(), matrizC[i][j].getX(), matrizC[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
+                    gc2.setStroke(Color.BLACK);
+                }
+            }
+        }
+        WritableImage imageMosaic = canvas2.snapshot(null, null);
+        BufferedImage bImage = SwingFXUtils.fromFXImage(imageMosaic, null);
+        ImageIO.write(bImage, "png", file);
+        gc2.clearRect(0, 0, chunkWidth * rowsM, chunkHeight*colsM);
+        for (int i = 0; i <= rowsM; i++) {
+            for (int j = 0; j <= colsM; j++) {
+                gc2.strokeLine(0, i * chunkWidth, Integer.parseInt(field3.getText()), i * chunkWidth);
+                gc2.strokeLine(j * chunkWidth, 0, j * chunkWidth, Integer.parseInt(field4.getText()));
+            }
+        }
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if (matrizC[i][j].getImage() != null) {
+                    gc2.drawImage(matrizC[i][j].getImage().getImage(), matrizC[i][j].getX(), matrizC[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
                 }
             }
         }
     }
+
+    EventHandler<ActionEvent> buttonSavePng = new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent event) {
+            try {
+                saveImage();
+
+            } catch (IOException ex) {
+                Logger.getLogger(ImageSelect.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    };
+
 }

@@ -5,6 +5,14 @@
  */
 package domain;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.scene.image.Image;
 
 /**
@@ -21,7 +29,6 @@ public class Imagen {
     private Image image;
 
     //constructores
-
     public Imagen(double x, double y, int width, int heigth, Image image) {
         this.x = x;
         this.y = y;
@@ -29,8 +36,8 @@ public class Imagen {
         this.heigth = heigth;
         this.image = image;
     }
-    
-     public Imagen() {
+
+    public Imagen() {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -81,5 +88,25 @@ public class Imagen {
     @Override
     public String toString() {
         return "Imagen{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + image + '}';
-    }     
+    }
+
+    public int sizeInBytes() {
+        return 2 + 2 + 4 + 4 + 8;
+    }
+
+    public boolean saveBooks(Imagen imagen) throws IOException, ClassNotFoundException {
+        List<Imagen> imagenList = new ArrayList<Imagen>();
+        File file = new File("imagenList.txt");
+        if (file.exists()) {
+            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));//lee el archivo
+            Object aux = objectInputStream.readObject();
+            imagenList = (List<Imagen>) aux;
+            objectInputStream.close();
+        }//if
+        imagenList.add(imagen);
+        ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(file));//escribe
+        output.writeUnshared(imagenList);//escribe el objeto
+        output.close();//cerrar el archivo
+        return true;
+    }
 }
