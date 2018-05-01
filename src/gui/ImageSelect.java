@@ -67,6 +67,8 @@ public class ImageSelect extends Application {
     private Button buttonDeleted;
     private Button buttonSaveImage;
     private Button buttonSave;
+    private Button buttonFlipH;
+    private Button buttonFlipV;
     private Label label;
     private TextField field3;
     private Label label3;
@@ -112,48 +114,56 @@ public class ImageSelect extends Application {
 
     private void initComponents(Stage primaryStage) throws FileNotFoundException, IOException {
         this.button = new Button("Select an image");
-        this.button.relocate(100, 605);
-        this.button.setPrefSize(150, 30);
+        this.button.relocate(65, 605);
+        this.button.setPrefSize(140, 30);
         this.button.setOnAction(buttonAction);
         this.label = new Label("Size");
-        this.label.relocate(290, 610);
+        this.label.relocate(215, 610);
         this.label.setMinSize(150, 20);
         this.field = new TextField();
-        this.field.relocate(320, 610);
+        this.field.relocate(240, 610);
         this.field.setPrefSize(70, 20);
         this.buttonSaveImage = new Button("Save image of mosaic");
-        this.buttonSaveImage.relocate(437, 605);
+        this.buttonSaveImage.relocate(339, 605);
         this.buttonSaveImage.setPrefSize(140, 30);
         this.buttonSaveImage.setOnAction(buttonSavePng);
         this.buttonSave = new Button("Save");
-        this.buttonSave.relocate(593, 605);
+        this.buttonSave.relocate(490, 605);
         this.buttonSave.setPrefSize(70, 30);
-        this.buttonSave.setOnAction(buttonSavePng);
+        ///////Falta esteee this.buttonSave.setOnAction();
         this.canvas2 = new Canvas(1400, 1400);
         canvas = new Canvas(1400, 1400);
         gc2 = this.canvas2.getGraphicsContext2D();
         this.label3 = new Label("Width");
-        this.label3.relocate(700, 610);
+        this.label3.relocate(580, 610);
         this.label3.setMinSize(150, 20);
         this.field3 = new TextField();
-        this.field3.relocate(740, 610);
+        this.field3.relocate(620, 610);
         this.field3.setPrefSize(70, 20);
         this.label4 = new Label("Heigth");
-        this.label4.relocate(820, 610);
+        this.label4.relocate(705, 610);
         this.label4.setMinSize(150, 20);
         this.field4 = new TextField();
-        this.field4.relocate(865, 610);
+        this.field4.relocate(750, 610);
         this.field4.setPrefSize(70, 20);
         this.buttonRotateL = new Button("Rotate left");
-        this.buttonRotateL.relocate(945, 605);
-        this.buttonRotateL.setPrefSize(90, 30);
+        this.buttonRotateL.relocate(830, 605);
+        this.buttonRotateL.setPrefSize(80, 30);
         this.buttonRotateL.setOnAction(buttonRotateLAction);
         this.buttonRotateR = new Button("Rotate Right");
-        this.buttonRotateR.relocate(1040, 605);
+        this.buttonRotateR.relocate(920, 605);
         this.buttonRotateR.setPrefSize(90, 30);
         this.buttonRotateR.setOnAction(buttonRotateRAction);
+        this.buttonFlipH = new Button("Flip Horizontal");
+        this.buttonFlipH.relocate(1015, 605);
+        this.buttonFlipH.setPrefSize(100, 30);
+        this.buttonFlipH.setOnAction(buttonFlipHAction);
+        this.buttonFlipV = new Button("Flip Vertical");
+        this.buttonFlipV.relocate(1125, 605);
+        this.buttonFlipV.setPrefSize(90, 30);
+        this.buttonFlipV.setOnAction(buttonFlipVAction);
         this.buttonDeleted = new Button("Deleted");
-        this.buttonDeleted.relocate(1135, 605);
+        this.buttonDeleted.relocate(1225, 605);
         this.buttonDeleted.setPrefSize(90, 30);
         this.buttonDeleted.setOnAction(buttonDeleteAction);
         this.pane = new Pane();
@@ -169,6 +179,8 @@ public class ImageSelect extends Application {
         this.pane.getChildren().add(this.buttonDeleted);
         this.pane.getChildren().add(this.buttonSaveImage);
         this.pane.getChildren().add(this.buttonSave);
+        this.pane.getChildren().add(this.buttonFlipH);
+        this.pane.getChildren().add(this.buttonFlipV);
         this.scene = new Scene(this.pane, WIDTH, HEIGHT);
         scrollPane = new ScrollPane();
         scrollPane.setPrefSize(600, 600);
@@ -187,7 +199,6 @@ public class ImageSelect extends Application {
         backgroundImage = new BackgroundImage(imageBackground, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, backgroundSize);
         background = new Background(backgroundImage);
         this.pane.setBackground(background);
-
         primaryStage.setScene(this.scene);
     }
 
@@ -469,4 +480,49 @@ public class ImageSelect extends Application {
         }
     };
 
+    public void flipHorizontalImage(int x, int y) {
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if ((x >= matrixC[i][j].getX() && x <= matrixC[i][j].getX() + matrixC[i][j].getWidth())
+                        && (y >= matrixC[i][j].getY() && y <= matrixC[i][j].getY() + matrixC[i][j].getHeigth())) {
+                    imagenRotate = matrixC[i][j].getImage().getImage();
+                    imageS = new ImageView(imagenRotate);
+                    imageS.setScaleX(-2.2);
+                    imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
+                    gc2.drawImage(this.imagenRotate, matrixC[i][j].getX(), matrixC[i][j].getY(), matrixC[i][j].getWidth(), matrixC[i][j].getHeigth());
+                    imagenRotate = imageS.snapshot(this.snapshot, null);
+                    imagenCambiada = new Imagen(matrixC[i][j].getX(), matrixC[i][j].getY(), matrixC[i][j].getWidth(), matrixC[i][j].getHeigth(), imagenRotate);
+                    matrixC[i][j] = new Cuadro(matrixC[i][j].getX(), matrixC[i][j].getY(), matrixC[i][j].getWidth(), matrixC[i][j].getHeigth(), imagenCambiada);
+                }
+            }
+        }
+    }
+    EventHandler<ActionEvent> buttonFlipHAction = new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent event) {
+            flipHorizontalImage(x, y);
+        }
+    };
+
+    public void flipVerticalImage(int x, int y) {
+        for (int i = 0; i < rowsM; i++) {
+            for (int j = 0; j < colsM; j++) {
+                if ((x >= matrixC[i][j].getX() && x <= matrixC[i][j].getX() + matrixC[i][j].getWidth())
+                        && (y >= matrixC[i][j].getY() && y <= matrixC[i][j].getY() + matrixC[i][j].getHeigth())) {
+                    imagenRotate = matrixC[i][j].getImage().getImage();
+                    imageS = new ImageView(imagenRotate);
+                    imageS.setScaleY(-1.1);
+                    imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
+                    gc2.drawImage(this.imagenRotate, matrixC[i][j].getX(), matrixC[i][j].getY(), matrixC[i][j].getWidth(), matrixC[i][j].getHeigth());
+                    imagenRotate = imageS.snapshot(this.snapshot, null);
+                    imagenCambiada = new Imagen(matrixC[i][j].getX(), matrixC[i][j].getY(), matrixC[i][j].getWidth(), matrixC[i][j].getHeigth(), imagenRotate);
+                    matrixC[i][j] = new Cuadro(matrixC[i][j].getX(), matrixC[i][j].getY(), matrixC[i][j].getWidth(), matrixC[i][j].getHeigth(), imagenCambiada);
+                }
+            }
+        }
+    }
+    EventHandler<ActionEvent> buttonFlipVAction = new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent event) {
+            flipVerticalImage(x, y);
+        }
+    };
 }
