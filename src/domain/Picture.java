@@ -5,36 +5,52 @@
  */
 package domain;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javafx.scene.image.Image;
+
 /**
  *
  * @author Heller
  */
-public class Cuadro {
-   
+public class Picture implements Serializable{
+
     //atributos
     private double x;
     private double y;
     private int width;
     private int heigth;
-    private Imagen imagen;
+    private Image image;
 
     //constructores
-
-     public Cuadro(double x, double y, int width, int heigth, Imagen imagen) {
+    public Picture(double x, double y, int width, int heigth, Image image) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.heigth = heigth;
-        this.imagen=imagen;
-    }    
-    
-     public Cuadro() {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.heigth = heigth;
+        this.image = image;
     }
-
+    public Picture(double x, double y, int width, int heigth) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.heigth = heigth;        
+    }
+    public Picture() {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.heigth = heigth;
+        this.image = image;
+    }
+    //metodos accesores
     public double getX() {
         return x;
     }
@@ -67,16 +83,17 @@ public class Cuadro {
         this.heigth = heigth;
     }
 
-    public Imagen getImage() {
-        return imagen;
+    public Image getImage() {
+        return image;
     }
 
-    public void setImage(Imagen image) {
-        this.imagen = image;
+    public void setImage(Image image) {
+        this.image = image;
     }
 
     @Override
     public String toString() {
-        return "Celda{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + imagen + '}';
-    }     
+        return "Picture{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + image + '}';
+    }
+
 }
