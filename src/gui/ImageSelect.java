@@ -26,6 +26,9 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TextField;
@@ -39,6 +42,7 @@ import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -99,11 +103,16 @@ public class ImageSelect extends Application {
     private int x;
     private int y;
     private int sizeMatrixC;
-    Image imageBackground;
-    BackgroundSize backgroundSize;
-    BackgroundImage backgroundImage;
-    Background background;
-    ImageData imageData = new ImageData();
+    private Image imageBackground;
+    private BackgroundSize backgroundSize;
+    private BackgroundImage backgroundImage;
+    private Background background;
+    private ImageData imageData = new ImageData();
+    private MenuBar menuBar;
+    private Menu file;
+    private MenuItem menuItemOpen;
+    private MenuItem menuItemSave;
+    private BorderPane root=new BorderPane();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -130,7 +139,7 @@ public class ImageSelect extends Application {
         this.buttonSave = new Button("Save");
         this.buttonSave.relocate(490, 605);
         this.buttonSave.setPrefSize(70, 30);
-        this.buttonSave.setOnAction(buttonSaveProject);
+        this.buttonSave.setOnAction(ItemSaveProject);
         this.canvas2 = new Canvas(1400, 1400);
         canvas = new Canvas(1400, 1400);
         gc2 = this.canvas2.getGraphicsContext2D();
@@ -178,10 +187,23 @@ public class ImageSelect extends Application {
         this.pane.getChildren().add(this.buttonRotateR);
         this.pane.getChildren().add(this.buttonDeleted);
         this.pane.getChildren().add(this.buttonSaveImage);
-        this.pane.getChildren().add(this.buttonSave);
+        //this.pane.getChildren().add(this.buttonSave);
         this.pane.getChildren().add(this.buttonFlipH);
         this.pane.getChildren().add(this.buttonFlipV);
         this.scene = new Scene(this.pane, WIDTH, HEIGHT);
+        menuBar=new MenuBar();
+        file=new Menu("File");
+        menuItemOpen=new MenuItem("Open project");
+        menuItemSave=new MenuItem("Save project");
+        menuItemSave.setOnAction(ItemSaveProject);
+        menuBar.getMenus().add(file);
+        file.getItems().addAll(menuItemOpen);
+        file.getItems().addAll(menuItemSave);
+        root.setTop(menuBar);
+        this.scene = new Scene(this.root, WIDTH, HEIGHT);
+        pane.setLayoutX(0);
+        pane.setLayoutY(20);
+        root.getChildren().add(pane);
         scrollPane = new ScrollPane();
         scrollPane.setPrefSize(600, 600);
         canvas.setOnMouseClicked(eventSelectImage);
@@ -530,12 +552,14 @@ public class ImageSelect extends Application {
             }
         }
     }
+    /*********EVENTO DEL MOUSE PARA EL FLIP VERTICAL**************/
     EventHandler<ActionEvent> buttonFlipVAction = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             flipVerticalImage(x, y);
         }
     };
-    EventHandler<ActionEvent> buttonSaveProject = new EventHandler<ActionEvent>() {
+    /*****METODO EN EL QUE SE GUARDA TODO EL PROYECTO PARA LUEGO USARLO*****/
+    EventHandler<ActionEvent> ItemSaveProject = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             Picture pictureSave;
             Grid gridSave;
@@ -587,4 +611,6 @@ public class ImageSelect extends Application {
 
         }
     };
+    
+    
 }
