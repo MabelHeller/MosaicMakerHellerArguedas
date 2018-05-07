@@ -5,7 +5,7 @@
  */
 package mosaicmakerhellerarguedas;
 
-import gui.ImageSelect;
+import gui.ImageGUI;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -24,7 +24,7 @@ public class MosaicMakerHellerArguedas {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Application.launch(ImageSelect.class, args);
+        Application.launch(ImageGUI.class, args);
     }
 
 }

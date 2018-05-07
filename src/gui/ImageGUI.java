@@ -54,7 +54,7 @@ import javax.imageio.ImageIO;
  *
  * @author Heller
  */
-public class ImageSelect extends Application {
+public class ImageGUI extends Application {
 
     //atributos
     private final int WIDTH = 1400;
@@ -80,6 +80,7 @@ public class ImageSelect extends Application {
     private PixelReader pixel; //se encarga de leer pixel por pixel
     private WritableImage writable; //convierte pixeles en una imagen
     private ArrayList<Image> imagenPartes = new ArrayList<>();
+    private ArrayList<Image> picture = new ArrayList<>();
     private int rows;
     private int cols;
     private int rowsM;
@@ -112,7 +113,9 @@ public class ImageSelect extends Application {
     private Menu file;
     private MenuItem menuItemOpen;
     private MenuItem menuItemSave;
-    private BorderPane root=new BorderPane();
+    private File folderImage;
+    private File folderGrid;
+    private BorderPane root = new BorderPane();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -136,10 +139,6 @@ public class ImageSelect extends Application {
         this.buttonSaveImage.relocate(339, 605);
         this.buttonSaveImage.setPrefSize(140, 30);
         this.buttonSaveImage.setOnAction(buttonSavePng);
-        this.buttonSave = new Button("Save");
-        this.buttonSave.relocate(490, 605);
-        this.buttonSave.setPrefSize(70, 30);
-        this.buttonSave.setOnAction(ItemSaveProject);
         this.canvas2 = new Canvas(1400, 1400);
         canvas = new Canvas(1400, 1400);
         gc2 = this.canvas2.getGraphicsContext2D();
@@ -191,11 +190,12 @@ public class ImageSelect extends Application {
         this.pane.getChildren().add(this.buttonFlipH);
         this.pane.getChildren().add(this.buttonFlipV);
         this.scene = new Scene(this.pane, WIDTH, HEIGHT);
-        menuBar=new MenuBar();
-        file=new Menu("File");
-        menuItemOpen=new MenuItem("Open project");
-        menuItemSave=new MenuItem("Save project");
+        menuBar = new MenuBar();
+        file = new Menu("File");
+        menuItemOpen = new MenuItem("Open project");
+        menuItemSave = new MenuItem("Save project");
         menuItemSave.setOnAction(ItemSaveProject);
+        menuItemOpen.setOnAction(ItemOpenProject);
         menuBar.getMenus().add(file);
         file.getItems().addAll(menuItemOpen);
         file.getItems().addAll(menuItemSave);
@@ -246,9 +246,9 @@ public class ImageSelect extends Application {
                 cropImage(gc);
                 draw(gc);
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(ImageSelect.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ImageGUI.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
-                Logger.getLogger(ImageSelect.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ImageGUI.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     };
@@ -270,6 +270,7 @@ public class ImageSelect extends Application {
             for (int y = 0; y < cols; y++) {
                 this.pixel = image.getPixelReader();//recibe los pixeles de la imagen
                 this.writable = new WritableImage(this.pixel, x * (int) chunkWidth, y * (int) chunkHeight, (int) chunkWidth, (int) chunkHeight);
+                System.out.println("imagen " + writable.getPixelWriter());
                 imagenPartes.add(writable);
             }
         }
@@ -283,7 +284,7 @@ public class ImageSelect extends Application {
             for (int j = 0; j <= colsM; j++) {
                 gc2.strokeLine(0, i * chunkWidth, Integer.parseInt(field3.getText()), i * chunkWidth);
                 gc2.strokeLine(j * chunkWidth, 0, j * chunkWidth, Integer.parseInt(field4.getText()));
-                matrixG[i][j] = new Grid(i * chunkWidth, j * chunkHeight, chunkWidth, chunkWidth, null);
+                matrixG[i][j] = new Grid(i * chunkWidth, j * chunkHeight, chunkWidth, chunkWidth, null, null);
             }
         }
     }
@@ -434,8 +435,8 @@ public class ImageSelect extends Application {
                         && (y >= matrixG[i][j].getY() && y <= matrixG[i][j].getY() + matrixG[i][j].getHeigth())) {
                     imagenRotate = null;
                     imageS = new ImageView(imagenRotate);
-                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), null);
-                    imageS.setImage(null); //rota la imagen 90 gredos sentido del reloj
+                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), null, null);
+                    imageS.setImage(null);
                     imagenRotate = imageS.snapshot(snapshot, null);
                     imagenCambiada = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
                     gc2.drawImage(this.imagenRotate, matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth());
@@ -453,12 +454,7 @@ public class ImageSelect extends Application {
     /**
      * ******************GUARDAR LA IIMAGEN****************************
      */
-    public void saveImage() throws IOException {
-        FileChooser fileChooserS = new FileChooser();
-        ExtensionFilter extFilter = new ExtensionFilter("PNG IMAGE (*.png)", "*.PNG", "(*.png)");
-        File file = fileChooserS.showSaveDialog(null);
-        fileChooserS.setSelectedExtensionFilter(extFilter);
-        fileChooserS.getExtensionFilters().addAll(extFilter);
+    public void saveImage(File file) throws IOException {
         scene.setFill(Color.TRANSPARENT); //le da el atributo de transparencia
         gc2.clearRect(0, 0, chunkWidth * rowsM, chunkHeight * colsM);
         for (int i = 0; i <= rowsM; i++) {
@@ -478,7 +474,7 @@ public class ImageSelect extends Application {
         }
         WritableImage imageMosaic = canvas2.snapshot(null, null);
         BufferedImage bImage = SwingFXUtils.fromFXImage(imageMosaic, null);
-        ImageIO.write(bImage, "*.png", file);
+        ImageIO.write(bImage, "png", new File(file.getPath() + ".png"));
         gc2.clearRect(0, 0, chunkWidth * rowsM, chunkHeight * colsM);
         for (int i = 0; i <= rowsM; i++) {
             for (int j = 0; j <= colsM; j++) {
@@ -498,9 +494,14 @@ public class ImageSelect extends Application {
     EventHandler<ActionEvent> buttonSavePng = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             try {
-                saveImage();
+                FileChooser fileChooserS = new FileChooser();
+                ExtensionFilter extFilter = new ExtensionFilter("PNG IMAGE (*.png)", "*.PNG", "(*.png)");
+                File file = fileChooserS.showSaveDialog(null);
+                fileChooserS.setSelectedExtensionFilter(extFilter);
+                fileChooserS.getExtensionFilters().addAll(extFilter);
+                saveImage(file);
             } catch (IOException ex) {
-                Logger.getLogger(ImageSelect.class
+                Logger.getLogger(ImageGUI.class
                         .getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -516,10 +517,9 @@ public class ImageSelect extends Application {
                         && (y >= matrixG[i][j].getY() && y <= matrixG[i][j].getY() + matrixG[i][j].getHeigth())) {
                     imagenRotate = matrixG[i][j].getImage().getImage();
                     imageS = new ImageView(imagenRotate);
-                    imageS.setScaleX(-2.2);
+                    imageS.setScaleX(-1.0);
                     imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
                     gc2.drawImage(this.imagenRotate, matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth());
-                    imagenRotate = imageS.snapshot(this.snapshot, null);
                     imagenCambiada = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
                     matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenCambiada);
                 }
@@ -542,75 +542,95 @@ public class ImageSelect extends Application {
                         && (y >= matrixG[i][j].getY() && y <= matrixG[i][j].getY() + matrixG[i][j].getHeigth())) {
                     imagenRotate = matrixG[i][j].getImage().getImage();
                     imageS = new ImageView(imagenRotate);
-                    imageS.setScaleY(-1.1);
+                    imageS.setScaleY(-1.0);
                     imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
                     gc2.drawImage(this.imagenRotate, matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth());
-                    imagenRotate = imageS.snapshot(this.snapshot, null);
                     imagenCambiada = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
                     matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenCambiada);
                 }
             }
         }
     }
-    /*********EVENTO DEL MOUSE PARA EL FLIP VERTICAL**************/
+    /**
+     * *******EVENTO DEL MOUSE PARA EL FLIP VERTICAL*************
+     */
     EventHandler<ActionEvent> buttonFlipVAction = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             flipVerticalImage(x, y);
         }
     };
-    /*****METODO EN EL QUE SE GUARDA TODO EL PROYECTO PARA LUEGO USARLO*****/
+
+    /**
+     * ***METODO EN EL QUE SE GUARDA TODO EL PROYECTO PARA LUEGO USARLO****
+     */
+    public void saveProject() throws IOException, ClassNotFoundException {        
+        Picture matrixPicSave[][]=new Picture[sizeMatrixI][sizeMatrixI];
+        Grid matrixGridSave[][]=new Grid[sizeMatrixC][sizeMatrixC];
+        Picture pictureSave;
+        Grid gridSave;
+        FileChooser fileChooserS = new FileChooser();
+        File file = fileChooserS.showSaveDialog(null);
+        String pathFolder = file.getPath() + "\\Project";
+        File folder = new File(pathFolder);
+        folder.mkdirs(); // esto crea la carpeta java, y requiere que exista la ruta
+        folderImage = new File(folder.getPath() + "//folderImage");
+        folderImage.mkdirs();
+        folderGrid = new File(folder.getPath() + "//folderGrid");
+        folderGrid.mkdirs();
+        int contPictures = 0;
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                try {
+                    BufferedImage bImage = SwingFXUtils.fromFXImage(matrixP[x][y].getImage(), null);
+                    ImageIO.write(bImage, "jpg", new File(folder.getPath() + "//folderImage" + "//img" + contPictures + ".jpg"));
+                    String pathPicture = folder.getPath() + "//folderImage" + "//img" + contPictures + ".jpg";
+                    pictureSave = new Picture(matrixP[x][y].getX(), matrixP[x][y].getY(), matrixP[x][y].getWidth(), matrixP[x][y].getHeigth(), pathPicture);
+                    contPictures++;
+                    matrixPicSave[x][y] = pictureSave;
+                } catch (IOException ex) {
+                    Logger.getLogger(ImageGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        imageData.savePicture(matrixPicSave, folder, rows, cols);
+        int cont = 0;
+        for (int x = 0; x <= rowsM; x++) {
+            for (int y = 0; y <= colsM; y++) {
+                if (matrixG[x][y].getImage() != null) {
+                    try {
+                        BufferedImage bImage = SwingFXUtils.fromFXImage(matrixG[x][y].getImage().getImage(), null);
+                        ImageIO.write(bImage, "jpg", new File(folder.getPath() + "//folderGrid" + "//imgG" + cont + ".jpg"));
+                        String pathGrid = folder.getPath() + "//folderImage" + "//img" + cont + ".jpg";
+                        gridSave = new Grid(matrixG[x][y].getX(), matrixG[x][y].getY(), matrixG[x][y].getWidth(), matrixG[x][y].getHeigth(), pathGrid);
+                        matrixGridSave[x][y] = gridSave;
+                        cont++;
+                    } catch (IOException ex) {
+                        Logger.getLogger(ImageGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
+        imageData.saveG(matrixGridSave, folder, rowsM, colsM);
+    }
     EventHandler<ActionEvent> ItemSaveProject = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
-            Picture pictureSave;
-            Grid gridSave;
-            FileChooser fileChooserS = new FileChooser();
-            File file = fileChooserS.showSaveDialog(null);
-            String pathFolder = file.getPath();
-            File folder = new File(pathFolder);
-            folder.mkdirs(); // esto crea la carpeta java, y requiere que exista la ruta
-            for (int x = 0; x < rows; x++) {
-                for (int y = 0; y < cols; y++) {
-                    try {
-                        pictureSave = new Picture(matrixP[x][y].getX(), matrixP[x][y].getY(), matrixP[x][y].getWidth(), matrixP[x][y].getHeigth());
-                        imageData.savePictures(pictureSave, folder);
-                        gridSave = new Grid(matrixG[x][y].getX(), matrixG[x][y].getY(), matrixG[x][y].getWidth(), matrixG[x][y].getHeigth());
-                        imageData.saveGrids(gridSave, folder);
-                    } catch (IOException ex) {
-                        Logger.getLogger(ImageSelect.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (ClassNotFoundException ex) {
-                        Logger.getLogger(ImageSelect.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+            try {
+                saveProject();
+            } catch (IOException ex) {
+                Logger.getLogger(ImageGUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ImageGUI.class.getName()).log(Level.SEVERE, null, ex);
             }
-            File folderImage = new File(folder.getPath() + "//folderImage");
-            folderImage.mkdirs();
-            File folderGrid = new File(folder.getPath() + "//folderGrid");
-            folderGrid.mkdirs();
-            for (int i = 0; i < imagenPartes.size(); i++) {
-                try {
-                    BufferedImage bImage = SwingFXUtils.fromFXImage(imagenPartes.get(i), null);
-                    ImageIO.write(bImage, "jpg", new File(folder.getPath() + "//folderImage" + "//img" + i + ".jpg"));
-                } catch (IOException ex) {
-                    Logger.getLogger(ImageSelect.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            int cont=0;
-            for (int x = 0; x <=rowsM; x++) {
-                for (int y = 0; y <=colsM; y++) {
-                    if (matrixG[x][y].getImage() != null) {
-                        try {
-                            BufferedImage bImage = SwingFXUtils.fromFXImage(matrixG[x][y].getImage().getImage(), null);
-                            ImageIO.write(bImage, "jpg", new File(folder.getPath() + "//folderGrid" + "//imgG" + cont + ".jpg"));
-                            cont++;
-                        } catch (IOException ex) {
-                            Logger.getLogger(ImageSelect.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            }
+        }
+    };
+
+    EventHandler<ActionEvent> ItemOpenProject = new EventHandler<ActionEvent>() {
+        public void handle(ActionEvent event) {
+            FileChooser fileChooserO = new FileChooser();
+            File fileN = fileChooserO.showOpenDialog(null);
+            String pathProject = fileN.getPath();
+            String pathj = ".//Project//folderImage";
 
         }
     };
-    
-    
 }

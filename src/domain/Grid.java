@@ -5,53 +5,54 @@
  */
 package domain;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
  * @author Heller
  */
-public class Grid implements Serializable{
-   
+public class Grid implements Serializable {
+
     //atributos
     private double x;
     private double y;
     private int width;
     private int heigth;
     private Picture imagen;
+    private String path;
 
     //constructores
+    public Grid(double x, double y, int width, int heigth, Picture imagen) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.heigth = heigth;
+        this.imagen = imagen;
+    }
 
-     public Grid(double x, double y, int width, int heigth, Picture imagen) {
+    public Grid(double x, double y, int width, int heigth, String path, Picture imagen) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.heigth = heigth;
-        this.imagen=imagen;
-    }    
-     
-     public Grid(double x, double y, int width, int heigth) {
+    }
+
+    public Grid(double x, double y, int width, int heigth, String path) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.heigth = heigth;
-    }  
-    
-     public Grid() {
+        this.path = path;
+    }
+
+    public Grid() {
         this.x = x;
         this.y = y;
         this.width = width;
         this.heigth = heigth;
     }
 //metodos accesores
+
     public double getX() {
         return x;
     }
@@ -92,8 +93,16 @@ public class Grid implements Serializable{
         this.imagen = image;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }    
+    
     @Override
     public String toString() {
         return "Grid{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + imagen + '}';
-    }   
+    }
 }

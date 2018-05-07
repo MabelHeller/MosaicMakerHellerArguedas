@@ -8,11 +8,11 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="MosaicMakerHellerArguedas.jar" size="24417" download="eager" />
+    <jar href="MosaicMakerHellerArguedas.jar" size="26295" download="eager" />
   </resources>
   <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="MosaicMakerHellerArguedas" >
     <param name="requiredFXVersion" value="8.0+"/>
   </applet-desc>
-  <jfx:javafx-desc  width="800" height="600" main-class="gui.ImageSelect"  name="MosaicMakerHellerArguedas" />
+  <jfx:javafx-desc  width="800" height="600" main-class="gui.ImageGUI"  name="MosaicMakerHellerArguedas" />
   <update check="always"/>
 </jnlp>

@@ -5,22 +5,14 @@
  */
 package domain;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.scene.image.Image;
 
 /**
  *
  * @author Heller
  */
-public class Picture implements Serializable{
+public class Picture implements Serializable {
 
     //atributos
     private double x;
@@ -28,6 +20,7 @@ public class Picture implements Serializable{
     private int width;
     private int heigth;
     private Image image;
+    private String path;
 
     //constructores
     public Picture(double x, double y, int width, int heigth, Image image) {
@@ -37,12 +30,22 @@ public class Picture implements Serializable{
         this.heigth = heigth;
         this.image = image;
     }
+
     public Picture(double x, double y, int width, int heigth) {
         this.x = x;
         this.y = y;
         this.width = width;
-        this.heigth = heigth;        
+        this.heigth = heigth;
     }
+
+    public Picture(double x, double y, int width, int heigth, String path) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.heigth = heigth;
+        this.path = path;
+    }   
+
     public Picture() {
         this.x = x;
         this.y = y;
@@ -50,6 +53,7 @@ public class Picture implements Serializable{
         this.heigth = heigth;
         this.image = image;
     }
+
     //metodos accesores
     public double getX() {
         return x;
