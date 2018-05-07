@@ -46,14 +46,6 @@ public class Picture implements Serializable {
         this.path = path;
     }   
 
-    public Picture() {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.heigth = heigth;
-        this.image = image;
-    }
-
     //metodos accesores
     public double getX() {
         return x;

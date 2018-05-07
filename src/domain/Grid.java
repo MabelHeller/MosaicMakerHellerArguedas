@@ -18,16 +18,16 @@ public class Grid implements Serializable {
     private double y;
     private int width;
     private int heigth;
-    private Picture imagen;
+    private Picture picture;
     private String path;
 
     //constructores
-    public Grid(double x, double y, int width, int heigth, Picture imagen) {
+    public Grid(double x, double y, int width, int heigth, Picture picture) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.heigth = heigth;
-        this.imagen = imagen;
+        this.picture = picture;
     }
 
     public Grid(double x, double y, int width, int heigth, String path, Picture imagen) {
@@ -45,12 +45,6 @@ public class Grid implements Serializable {
         this.path = path;
     }
 
-    public Grid() {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.heigth = heigth;
-    }
 //metodos accesores
 
     public double getX() {
@@ -85,12 +79,12 @@ public class Grid implements Serializable {
         this.heigth = heigth;
     }
 
-    public Picture getImage() {
-        return imagen;
+    public Picture getPicture() {
+        return picture;
     }
 
-    public void setImage(Picture image) {
-        this.imagen = image;
+    public void setPicture(Picture picture) {
+        this.picture = picture;
     }
 
     public String getPath() {
@@ -103,6 +97,6 @@ public class Grid implements Serializable {
     
     @Override
     public String toString() {
-        return "Grid{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", image=" + imagen + '}';
+        return "Grid{" + "x=" + x + ", y=" + y + ", width=" + width + ", heigth=" + heigth + ", picture=" + picture + '}';
     }
 }

@@ -5,7 +5,7 @@
  */
 package gui;
 
-import data.ImageData;
+import data.ProjectData;
 import domain.Grid;
 import domain.Picture;
 import java.awt.image.BufferedImage;
@@ -69,7 +69,6 @@ public class ImageGUI extends Application {
     private Button buttonRotateR;
     private Button buttonDeleted;
     private Button buttonSaveImage;
-    private Button buttonSave;
     private Button buttonFlipH;
     private Button buttonFlipV;
     private Label label;
@@ -79,7 +78,7 @@ public class ImageGUI extends Application {
     private Label label4;
     private PixelReader pixel; //se encarga de leer pixel por pixel
     private WritableImage writable; //convierte pixeles en una imagen
-    private ArrayList<Image> imagenPartes = new ArrayList<>();
+    private ArrayList<Image> imageParts = new ArrayList<>();
     private ArrayList<Image> picture = new ArrayList<>();
     private int rows;
     private int cols;
@@ -98,7 +97,7 @@ public class ImageGUI extends Application {
     private Grid matrixG[][];
     private int sizeMatrixI;
     private Picture imageSelect;
-    private Picture imagenCambiada;
+    private Picture changedImage;
     private ImageView imageS;
     private Image imagenRotate;
     private int x;
@@ -108,7 +107,7 @@ public class ImageGUI extends Application {
     private BackgroundSize backgroundSize;
     private BackgroundImage backgroundImage;
     private Background background;
-    private ImageData imageData = new ImageData();
+    private ProjectData imageData = new ProjectData();
     private MenuBar menuBar;
     private Menu file;
     private MenuItem menuItemOpen;
@@ -186,7 +185,6 @@ public class ImageGUI extends Application {
         this.pane.getChildren().add(this.buttonRotateR);
         this.pane.getChildren().add(this.buttonDeleted);
         this.pane.getChildren().add(this.buttonSaveImage);
-        //this.pane.getChildren().add(this.buttonSave);
         this.pane.getChildren().add(this.buttonFlipH);
         this.pane.getChildren().add(this.buttonFlipV);
         this.scene = new Scene(this.pane, WIDTH, HEIGHT);
@@ -271,7 +269,7 @@ public class ImageGUI extends Application {
                 this.pixel = image.getPixelReader();//recibe los pixeles de la imagen
                 this.writable = new WritableImage(this.pixel, x * (int) chunkWidth, y * (int) chunkHeight, (int) chunkWidth, (int) chunkHeight);
                 System.out.println("imagen " + writable.getPixelWriter());
-                imagenPartes.add(writable);
+                imageParts.add(writable);
             }
         }
         rowsM = (int) (Integer.parseInt(field3.getText()) / chunkWidth);
@@ -296,8 +294,8 @@ public class ImageGUI extends Application {
         int iter = 0;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                gc.drawImage(imagenPartes.get(iter), i * (chunkWidth + 2), j * (chunkHeight + 2));
-                matrixP[i][j] = new Picture(i * (chunkWidth), j * (chunkHeight), chunkWidth, chunkHeight, imagenPartes.get(iter));
+                gc.drawImage(imageParts.get(iter), i * (chunkWidth + 2), j * (chunkHeight + 2));
+                matrixP[i][j] = new Picture(i * (chunkWidth), j * (chunkHeight), chunkWidth, chunkHeight, imageParts.get(iter));
                 iter++;
             }
         }
@@ -342,7 +340,7 @@ public class ImageGUI extends Application {
             for (int j = 0; j < colsM; j++) {
                 if ((x >= matrixG[i][j].getX() && x <= matrixG[i][j].getX() + matrixG[i][j].getWidth())
                         && (y >= matrixG[i][j].getY() && y <= matrixG[i][j].getY() + matrixG[i][j].getHeigth())) {
-                    if (matrixG[i][j].getImage() == null) {
+                    if (matrixG[i][j].getPicture() == null) {
                         gc2.drawImage(imageSelect.getImage(), matrixG[i][j].getX(), matrixG[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
                         imageSelect = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imageSelect.getImage());
                         matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imageSelect);
@@ -377,20 +375,20 @@ public class ImageGUI extends Application {
             for (int j = 0; j < colsM; j++) {
                 if ((x >= matrixG[i][j].getX() && x <= matrixG[i][j].getX() + matrixG[i][j].getWidth())
                         && (y >= matrixG[i][j].getY() && y <= matrixG[i][j].getY() + matrixG[i][j].getHeigth())) {
-                    imagenRotate = matrixG[i][j].getImage().getImage();
+                    imagenRotate = matrixG[i][j].getPicture().getImage();
                     imageS = new ImageView(imagenRotate);
                     imageS.setRotate(imageS.getRotate() + 90); //rota la imagen 90 gredos sentido del reloj
                     imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
                     gc2.drawImage(this.imagenRotate, matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth());
                     imagenRotate = imageS.snapshot(this.snapshot, null);
-                    imagenCambiada = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
-                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenCambiada);
+                    changedImage = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
+                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), changedImage);
                 }
             }
         }
     }
     /**
-     * ***********EVENTO DEL MOUSE EN EL QUE SE ROTA LA IMAGEN
+     * ***********EVENTO DEL MOUSE EN EL QUE SE ROTA LA IMAGEN A LA IZQUIERDA
      * SELECCIONADA*******
      */
     EventHandler<ActionEvent> buttonRotateLAction = new EventHandler<ActionEvent>() {
@@ -407,18 +405,19 @@ public class ImageGUI extends Application {
             for (int j = 0; j < colsM; j++) {
                 if ((x >= matrixG[i][j].getX() && x <= matrixG[i][j].getX() + matrixG[i][j].getWidth())
                         && (y >= matrixG[i][j].getY() && y <= matrixG[i][j].getY() + matrixG[i][j].getHeigth())) {
-                    imagenRotate = matrixG[i][j].getImage().getImage();
+                    imagenRotate = matrixG[i][j].getPicture().getImage();
                     imageS = new ImageView(imagenRotate);
                     imageS.setRotate(imageS.getRotate() - 90); //rota la imagen 90 gredos sentido del reloj
                     imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
                     gc2.drawImage(this.imagenRotate, matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth());
                     imagenRotate = imageS.snapshot(this.snapshot, null);
-                    imagenCambiada = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
-                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenCambiada);
+                    changedImage = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
+                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), changedImage);
                 }
             }
         }
     }
+    /*EVENTO PARA ROTAR UNA IMAGEN A LA DERECHA*/
     EventHandler<ActionEvent> buttonRotateRAction = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             RotateRight(x, y);
@@ -438,7 +437,7 @@ public class ImageGUI extends Application {
                     matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), null, null);
                     imageS.setImage(null);
                     imagenRotate = imageS.snapshot(snapshot, null);
-                    imagenCambiada = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
+                    changedImage = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
                     gc2.drawImage(this.imagenRotate, matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth());
                 }
             }
@@ -466,8 +465,8 @@ public class ImageGUI extends Application {
         }
         for (int i = 0; i < rowsM; i++) {
             for (int j = 0; j < colsM; j++) {
-                if (matrixG[i][j].getImage() != null) {
-                    gc2.drawImage(matrixG[i][j].getImage().getImage(), matrixG[i][j].getX(), matrixG[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
+                if (matrixG[i][j].getPicture() != null) {
+                    gc2.drawImage(matrixG[i][j].getPicture().getImage(), matrixG[i][j].getX(), matrixG[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
                     gc2.setStroke(Color.BLACK);
                 }
             }
@@ -484,13 +483,14 @@ public class ImageGUI extends Application {
         }
         for (int i = 0; i < rowsM; i++) {
             for (int j = 0; j < colsM; j++) {
-                if (matrixG[i][j].getImage() != null) {
-                    gc2.drawImage(matrixG[i][j].getImage().getImage(), matrixG[i][j].getX(), matrixG[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
+                if (matrixG[i][j].getPicture() != null) {
+                    gc2.drawImage(matrixG[i][j].getPicture().getImage(), matrixG[i][j].getX(), matrixG[i][j].getY(), imageSelect.getWidth(), imageSelect.getWidth());
                 }
             }
         }
     }
-
+/*EVENTO EN EL QUE SE GUARDA LA IMAGEN POR MEDIO DE UN BOTON */
+    /*SE ABRE UN FILECHOOSER PARA ELEGIR DONDE GUARDARLO*/
     EventHandler<ActionEvent> buttonSavePng = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             try {
@@ -515,13 +515,13 @@ public class ImageGUI extends Application {
             for (int j = 0; j < colsM; j++) {
                 if ((x >= matrixG[i][j].getX() && x <= matrixG[i][j].getX() + matrixG[i][j].getWidth())
                         && (y >= matrixG[i][j].getY() && y <= matrixG[i][j].getY() + matrixG[i][j].getHeigth())) {
-                    imagenRotate = matrixG[i][j].getImage().getImage();
+                    imagenRotate = matrixG[i][j].getPicture().getImage();
                     imageS = new ImageView(imagenRotate);
                     imageS.setScaleX(-1.0);
                     imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
                     gc2.drawImage(this.imagenRotate, matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth());
-                    imagenCambiada = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
-                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenCambiada);
+                    changedImage = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
+                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), changedImage);
                 }
             }
         }
@@ -533,20 +533,20 @@ public class ImageGUI extends Application {
     };
 
     /**
-     * ***********METODO EN EL QUE VOLTEA A LA VERTICAL**************
+     * ***********METODO EN EL QUE VOLTEA LA IMAGEN VERTICALMENTE**************
      */
     public void flipVerticalImage(int x, int y) {
         for (int i = 0; i < rowsM; i++) {
             for (int j = 0; j < colsM; j++) {
                 if ((x >= matrixG[i][j].getX() && x <= matrixG[i][j].getX() + matrixG[i][j].getWidth())
                         && (y >= matrixG[i][j].getY() && y <= matrixG[i][j].getY() + matrixG[i][j].getHeigth())) {
-                    imagenRotate = matrixG[i][j].getImage().getImage();
+                    imagenRotate = matrixG[i][j].getPicture().getImage();
                     imageS = new ImageView(imagenRotate);
-                    imageS.setScaleY(-1.0);
+                    imageS.setScaleY(-1.0);//metodo que escala las coordenadas
                     imagenRotate = imageS.snapshot(snapshot, null); //obtienen la imagen modificada y la sobreescribe con la original
                     gc2.drawImage(this.imagenRotate, matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth());
-                    imagenCambiada = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
-                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenCambiada);
+                    changedImage = new Picture(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), imagenRotate);
+                    matrixG[i][j] = new Grid(matrixG[i][j].getX(), matrixG[i][j].getY(), matrixG[i][j].getWidth(), matrixG[i][j].getHeigth(), changedImage);
                 }
             }
         }
@@ -562,7 +562,9 @@ public class ImageGUI extends Application {
 
     /**
      * ***METODO EN EL QUE SE GUARDA TODO EL PROYECTO PARA LUEGO USARLO****
-     */
+     * SE CREA UNA CARPETA EN LA QUE SE GUARDARA EL ARCHIVO CON LAS MATRICES Y
+     * DOS CARPETAS MAS CON LAS IMAGENES COLOCADAS EN LOS DOS MOSAICOS*/
+     
     public void saveProject() throws IOException, ClassNotFoundException {        
         Picture matrixPicSave[][]=new Picture[sizeMatrixI][sizeMatrixI];
         Grid matrixGridSave[][]=new Grid[sizeMatrixC][sizeMatrixC];
@@ -596,9 +598,9 @@ public class ImageGUI extends Application {
         int cont = 0;
         for (int x = 0; x <= rowsM; x++) {
             for (int y = 0; y <= colsM; y++) {
-                if (matrixG[x][y].getImage() != null) {
+                if (matrixG[x][y].getPicture() != null) {
                     try {
-                        BufferedImage bImage = SwingFXUtils.fromFXImage(matrixG[x][y].getImage().getImage(), null);
+                        BufferedImage bImage = SwingFXUtils.fromFXImage(matrixG[x][y].getPicture().getImage(), null);
                         ImageIO.write(bImage, "jpg", new File(folder.getPath() + "//folderGrid" + "//imgG" + cont + ".jpg"));
                         String pathGrid = folder.getPath() + "//folderImage" + "//img" + cont + ".jpg";
                         gridSave = new Grid(matrixG[x][y].getX(), matrixG[x][y].getY(), matrixG[x][y].getWidth(), matrixG[x][y].getHeigth(), pathGrid);
@@ -610,8 +612,9 @@ public class ImageGUI extends Application {
                 }
             }
         }
-        imageData.saveG(matrixGridSave, folder, rowsM, colsM);
+        imageData.saveGrid(matrixGridSave, folder, rowsM, colsM);
     }
+    /*EVENTO EN EL QUE SE GUARDA EL PROYECTO POR MEDIO DE UN ITEM MENU*/
     EventHandler<ActionEvent> ItemSaveProject = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             try {
@@ -623,7 +626,7 @@ public class ImageGUI extends Application {
             }
         }
     };
-
+/*EVENTO EN EL QUE SE ABRE POR MEDIO DE UN ITEM MENU EL PROYECTO ELEGIDO*/
     EventHandler<ActionEvent> ItemOpenProject = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent event) {
             FileChooser fileChooserO = new FileChooser();
